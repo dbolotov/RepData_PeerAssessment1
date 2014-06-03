@@ -180,12 +180,18 @@ hljs.initHighlightingOnLoad();
 <body>
 <h1>Reproducible Research: Peer Assessment 1</h1>
 
-<pre><code class="r">setwd(&quot;E:/documents/ebooks/ML_AI/RepData_PeerAssessment1&quot;)
+<h2>Load necessary libraries</h2>
+
+<pre><code class="r">library(ggplot2)
+</code></pre>
+
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 3.0.3
 </code></pre>
 
 <h2>Loading and preprocessing the data</h2>
 
-<pre><code class="r">data &lt;- read.csv(&quot;activity.csv&quot;)
+<pre><code class="r">setwd(&quot;E:/documents/ebooks/ML_AI/RepData_PeerAssessment1&quot;)
+data &lt;- read.csv(&quot;activity.csv&quot;)
 </code></pre>
 
 <h2>What is mean total number of steps taken per day?</h2>

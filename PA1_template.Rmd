@@ -38,7 +38,7 @@ subset(mean_steps_by_interval,steps==max(steps))$interval
 
 ## Imputing missing values
 ```{r}
-rows_with_missing_values <- sum(!complete.cases(data))
+count_rows_with_missing_values <- sum(!complete.cases(data))
 
 
 

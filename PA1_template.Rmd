@@ -15,10 +15,14 @@ data <- read.csv("activity.csv")
 
 ## What is mean total number of steps taken per day?
 ```{r}
+#calculate total number of steps per day
 total_steps_per_day <- aggregate(steps ~ date, data, sum)
 
-ggplot(data=total_steps_per_day,aes(x=steps)) + geom_histogram(binwidth=5000)
+#plot histogram
+ggplot(data=total_steps_per_day,aes(x=steps)) + geom_histogram(binwidth=5000) +
+    labs(title="Total Steps Per Day",x="Steps per day",y="Count")
 
+#calculate mean and median total steps per day
 mean_tot_steps_per_day <- mean(total_steps_per_day$steps,na.rm=T)
 median_tot_steps_per_day <- median(total_steps_per_day$steps,na.rm=T)
 
@@ -29,7 +33,8 @@ median_tot_steps_per_day <- median(total_steps_per_day$steps,na.rm=T)
 ## What is the average daily activity pattern?
 ```{r}
 mean_steps_by_interval <- aggregate(steps ~ interval, data, mean)
-ggplot(data=mean_steps_by_interval,aes(x=interval,y=steps)) + geom_line()
+ggplot(data=mean_steps_by_interval,aes(x=interval,y=steps)) + geom_line() +
+    labs(title="Average Daily Activity Pattern",x="Interval",y="Mean number of steps")
 
 subset(mean_steps_by_interval,steps==max(steps))$interval
 ```
@@ -37,12 +42,32 @@ subset(mean_steps_by_interval,steps==max(steps))$interval
 
 ## Imputing missing values
 ```{r}
+#calculate total number of rows with missing values
 count_rows_with_missing_values <- sum(!complete.cases(data))
 
+#create new df and impute NA values using rounded mean value for the interval
+data_im <- data
+
+for (j in 1:nrow(data_im)) {
+    if(is.na(data_im[j,1])){
+        data_im[j,1] <- round(subset(mean_steps_by_interval,interval==data_im$interval[j])[2])
+        }
+}
+
+#calculate total number of steps per day with imputed values
+total_steps_per_day_im <- aggregate(steps ~ date, data_im, sum)
+
+#plot histogram with imputed values
+ggplot(data=total_steps_per_day_im,aes(x=steps)) + geom_histogram(binwidth=5000) +
+    labs(title="Total Steps Per Day With Imputed Values",x="Steps per day",y="Count")
+
+#calculate mean and median total steps per day with imputed values
+mean_tot_steps_per_day_im <- mean(total_steps_per_day_im$steps,na.rm=T)
+median_tot_steps_per_day_im <- median(total_steps_per_day_im$steps,na.rm=T)
 
 
-
-
+#Do these values differ from the estimates from the first part of the assignment? 
+#What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 ```
 

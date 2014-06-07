@@ -32,9 +32,15 @@ ggplot(data=total_steps_per_day,aes(x=steps)) + geom_histogram(binwidth=5000) +
 
 ```r
 #calculate mean and median total steps per day
-mean_tot_steps_per_day <- mean(total_steps_per_day$steps,na.rm=T)
+mean_tot_steps_per_day <- round(mean(total_steps_per_day$steps,na.rm=T))
 median_tot_steps_per_day <- median(total_steps_per_day$steps,na.rm=T)
 ```
+
+The mean total number of steps taken per day is 1.0766 &times; 10<sup>4</sup>.
+
+The median total number of steps taken per day is 10765.
+
+
 
 
 ## What is the average daily activity pattern?
@@ -48,20 +54,25 @@ ggplot(data=mean_steps_by_interval,aes(x=interval,y=steps)) + geom_line() +
 ![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
 
 ```r
-subset(mean_steps_by_interval,steps==max(steps))$interval
+interval_with_max_steps <- subset(mean_steps_by_interval,steps==max(steps))$interval
 ```
 
-```
-## [1] 835
-```
-
+The 5-minute interval that contains the maximum number of steps is 835.
 
 ## Imputing missing values
 
+
 ```r
 #calculate total number of rows with missing values
-count_rows_with_missing_values <- sum(!complete.cases(data))
+count_rows_with_NA <- sum(!complete.cases(data))
+```
 
+The data contains 2304 rows with missing values.
+
+The strategy for imputing missing data is to use a rounded mean value for the 5-minute interval in question (using the dataset calculated above, where steps are averaged by interval across all days).
+
+
+```r
 #create new df and impute NA values using rounded mean value for the interval
 data_im <- data
 
@@ -79,7 +90,7 @@ ggplot(data=total_steps_per_day_im,aes(x=steps)) + geom_histogram(binwidth=5000)
     labs(title="Total Steps per Day with Imputed Values",x="Steps per day",y="Count")
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
 
 ```r
 #calculate mean and median total steps per day with imputed values
@@ -105,4 +116,4 @@ ggplot(data=mean_steps_by_interval_by_day_type,aes(x=interval,y=steps)) +
     labs(Title="Average Steps by Interval and Day Type",x="Interval",y="Steps")
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 

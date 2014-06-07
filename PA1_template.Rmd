@@ -1,5 +1,7 @@
 # Reproducible Research: Peer Assessment 1
 
+
+
 ## Load necessary libraries
 ```{r}
 library(ggplot2)
@@ -21,32 +23,44 @@ data$date <- as.Date(data$date, format="%Y-%m-%d")
 total_steps_per_day <- aggregate(steps ~ date, data, sum)
 
 #plot histogram
-ggplot(data=total_steps_per_day,aes(x=steps)) + geom_histogram(binwidth=5000) +
+ggplot(data=total_steps_per_day,aes(x=steps)) + geom_histogram(binwidth=1000) +
     labs(title="Total Steps per Day",x="Steps per day",y="Count")
 
 #calculate mean and median total steps per day
-mean_tot_steps_per_day <- mean(total_steps_per_day$steps,na.rm=T)
+mean_tot_steps_per_day <- round(mean(total_steps_per_day$steps,na.rm=T))
 median_tot_steps_per_day <- median(total_steps_per_day$steps,na.rm=T)
 
-    
 ```
+
+The mean total number of steps taken per day is `r mean_tot_steps_per_day`. The median total number of steps taken per day is `r median_tot_steps_per_day`.
+
+
 
 
 ## What is the average daily activity pattern?
 ```{r}
+#aggregate step data by interval
 mean_steps_by_interval <- aggregate(steps ~ interval, data, mean)
+
 ggplot(data=mean_steps_by_interval,aes(x=interval,y=steps)) + geom_line() +
     labs(title="Average Steps by Interval",x="Interval",y="Mean number of steps")
 
-subset(mean_steps_by_interval,steps==max(steps))$interval
+interval_with_max_steps <- subset(mean_steps_by_interval,steps==max(steps))$interval
 ```
 
+The 5-minute interval that contains the maximum number of steps is `r interval_with_max_steps`.
 
 ## Imputing missing values
 ```{r}
 #calculate total number of rows with missing values
-count_rows_with_missing_values <- sum(!complete.cases(data))
+count_rows_with_NA <- sum(!complete.cases(data))
+```
 
+The data contains `r count_rows_with_NA` rows with missing values.
+
+The strategy for imputing missing data is to use a rounded mean value for the 5-minute interval in question (using the dataset calculated above, where steps are averaged by interval across all days).
+
+```{r}
 #create new df and impute NA values using rounded mean value for the interval
 data_im <- data
 
@@ -60,24 +74,34 @@ for (j in 1:nrow(data_im)) {
 total_steps_per_day_im <- aggregate(steps ~ date, data_im, sum)
 
 #plot histogram with imputed values
-ggplot(data=total_steps_per_day_im,aes(x=steps)) + geom_histogram(binwidth=5000) +
+ggplot(data=total_steps_per_day_im,aes(x=steps)) + geom_histogram(binwidth=1000) +
     labs(title="Total Steps per Day with Imputed Values",x="Steps per day",y="Count")
 
 #calculate mean and median total steps per day with imputed values
-mean_tot_steps_per_day_im <- mean(total_steps_per_day_im$steps,na.rm=T)
+mean_tot_steps_per_day_im <- round(mean(total_steps_per_day_im$steps,na.rm=T))
 median_tot_steps_per_day_im <- median(total_steps_per_day_im$steps,na.rm=T)
 
+```
 
-#Do these values differ from the estimates from the first part of the assignment? 
-#What is the impact of imputing missing data on the estimates of the total daily number of steps?
+With imputed values, the mean total number of steps taken per day is `r mean_tot_steps_per_day_im`. The median total number of steps taken per day is `r median_tot_steps_per_day_im`.
 
+
+These values differ from the estimates where NA values were omitted.The following code plots these data on the same panel. Since the mean value was used to fill missing values.
+```{r}
+
+#plot histogram
+ggplot(data=total_steps_per_day,aes(x=steps)) + 
+    geom_histogram(binwidth=1000,fill="blue",alpha=0.5) +
+    geom_histogram(data=total_steps_per_day_im,binwidth=1000,fill="red",alpha=0.5)
 ```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 ```{r}
+#create new factor variable (weekend or weekday)
 data_im$day_type <- as.factor(ifelse(weekdays(data_im$date) %in% c("Saturday","Sunday"),"weekend","weekday"))
 
+#aggregate step data by interval and day type
 mean_steps_by_interval_by_day_type <- aggregate(steps ~ interval+day_type, data_im, mean)
 
 ggplot(data=mean_steps_by_interval_by_day_type,aes(x=interval,y=steps)) +

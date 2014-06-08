@@ -240,7 +240,7 @@ count_rows_with_NA &lt;- sum(!complete.cases(data))
 
 <p>The data contains 2304 rows with missing values.</p>
 
-<p>The imputation strategy is to replace each NA with the rounded mean value for the corresponding 5-minute interva (using the dataset calculated above, where steps are averaged by interval across all days).</p>
+<p>The imputation strategy is to replace each NA with the rounded mean value for the corresponding 5-minute interval (using the dataset calculated above, where steps are averaged by interval across all days).</p>
 
 <pre><code class="r">#create new df and impute NA values using rounded mean value for the interval
 data_im &lt;- data
@@ -281,13 +281,15 @@ ggplot(data=total_steps_per_day,aes(x=steps)) +
 
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>
 
+<p>The following code plots steps taken in each 5-minute interval, averaged across all weekends or all weekdays. There is a clear difference between these two activity patterns; for example, weekdays show more activity earlier in the day, possibly corresponding to getting ready for and traveling to work.</p>
+
 <pre><code class="r">#create new factor variable (weekend or weekday)
 data_im$day_type &lt;- as.factor(ifelse(weekdays(data_im$date) %in% c(&quot;Saturday&quot;,&quot;Sunday&quot;),&quot;weekend&quot;,&quot;weekday&quot;))
 
 #aggregate step data by interval and day type
 mean_steps_by_interval_by_day_type &lt;- aggregate(steps ~ interval+day_type, data_im, mean)
 
-#plot time series of 5-minute intervals and the average steps taken, grouped by day
+#plot time series of 5-minute intervals and the average steps taken, grouped by day type
 ggplot(data=mean_steps_by_interval_by_day_type,aes(x=interval,y=steps)) +
     geom_line() +
     facet_grid(day_type ~ .) + 

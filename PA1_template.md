@@ -1,5 +1,7 @@
 # Reproducible Research: Peer Assessment 1
 
+
+
 ## Load necessary libraries
 
 ```r
@@ -13,7 +15,7 @@ library(data.table)
 ```r
 setwd("E:/documents/ebooks/ML_AI/RepData_PeerAssessment1")
 data <- read.csv("activity.csv")
-#convert date from string to Date format
+#convert date to Date format
 data$date <- as.Date(data$date, format="%Y-%m-%d")
 ```
 
@@ -24,7 +26,7 @@ data$date <- as.Date(data$date, format="%Y-%m-%d")
 total_steps_per_day <- aggregate(steps ~ date, data, sum)
 
 #plot histogram
-ggplot(data=total_steps_per_day,aes(x=steps)) + geom_histogram(binwidth=5000) +
+ggplot(data=total_steps_per_day,aes(x=steps)) + geom_histogram(binwidth=1000) +
     labs(title="Total Steps per Day",x="Steps per day",y="Count")
 ```
 
@@ -36,9 +38,7 @@ mean_tot_steps_per_day <- round(mean(total_steps_per_day$steps,na.rm=T))
 median_tot_steps_per_day <- median(total_steps_per_day$steps,na.rm=T)
 ```
 
-The mean total number of steps taken per day is 1.0766 &times; 10<sup>4</sup>.
-
-The median total number of steps taken per day is 10765.
+The mean total number of steps taken per day is 1.0766 &times; 10<sup>4</sup>. The median total number of steps taken per day is 10765.
 
 
 
@@ -46,7 +46,10 @@ The median total number of steps taken per day is 10765.
 ## What is the average daily activity pattern?
 
 ```r
+#aggregate step data by interval
 mean_steps_by_interval <- aggregate(steps ~ interval, data, mean)
+
+#plot time series of 5-minute intervals and the average steps taken
 ggplot(data=mean_steps_by_interval,aes(x=interval,y=steps)) + geom_line() +
     labs(title="Average Steps by Interval",x="Interval",y="Mean number of steps")
 ```
@@ -54,13 +57,13 @@ ggplot(data=mean_steps_by_interval,aes(x=interval,y=steps)) + geom_line() +
 ![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
 
 ```r
+#find interval with max steps
 interval_with_max_steps <- subset(mean_steps_by_interval,steps==max(steps))$interval
 ```
 
 The 5-minute interval that contains the maximum number of steps is 835.
 
 ## Imputing missing values
-
 
 ```r
 #calculate total number of rows with missing values
@@ -69,7 +72,7 @@ count_rows_with_NA <- sum(!complete.cases(data))
 
 The data contains 2304 rows with missing values.
 
-The strategy for imputing missing data is to use a rounded mean value for the 5-minute interval in question (using the dataset calculated above, where steps are averaged by interval across all days).
+The imputation strategy is to replace each NA with the rounded mean value for the corresponding 5-minute interva (using the dataset calculated above, where steps are averaged by interval across all days).
 
 
 ```r
@@ -86,7 +89,7 @@ for (j in 1:nrow(data_im)) {
 total_steps_per_day_im <- aggregate(steps ~ date, data_im, sum)
 
 #plot histogram with imputed values
-ggplot(data=total_steps_per_day_im,aes(x=steps)) + geom_histogram(binwidth=5000) +
+ggplot(data=total_steps_per_day_im,aes(x=steps)) + geom_histogram(binwidth=1000) +
     labs(title="Total Steps per Day with Imputed Values",x="Steps per day",y="Count")
 ```
 
@@ -94,26 +97,39 @@ ggplot(data=total_steps_per_day_im,aes(x=steps)) + geom_histogram(binwidth=5000)
 
 ```r
 #calculate mean and median total steps per day with imputed values
-mean_tot_steps_per_day_im <- mean(total_steps_per_day_im$steps,na.rm=T)
+mean_tot_steps_per_day_im <- round(mean(total_steps_per_day_im$steps,na.rm=T))
 median_tot_steps_per_day_im <- median(total_steps_per_day_im$steps,na.rm=T)
-
-
-#Do these values differ from the estimates from the first part of the assignment? 
-#What is the impact of imputing missing data on the estimates of the total daily number of steps?
 ```
+
+With imputed values, the mean total number of steps taken per day is 1.0766 &times; 10<sup>4</sup>. The median total number of steps taken per day is 1.0762 &times; 10<sup>4</sup>.
+
+These values differ from the estimates where NA values were omitted.The following code plots both datasets on the same panel to show how imputation affects the number of steps. Days containing missing values do not contain any non-NA entries, which means that days with imputed values will all get the same mean total steps per day. This is evident in the plot below, where the red bar shows the additional counts for the imputed dataset.
+
+```r
+#plot histogram
+ggplot(data=total_steps_per_day,aes(x=steps)) + 
+    geom_histogram(binwidth=1000,fill="blue",alpha=0.5) +
+    geom_histogram(data=total_steps_per_day_im,binwidth=1000,fill="red",alpha=0.5) + 
+    labs(title="Total Steps per Day: with Missing vs Imputed Values",x="Steps per day",y="Count")
+```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 ```r
+#create new factor variable (weekend or weekday)
 data_im$day_type <- as.factor(ifelse(weekdays(data_im$date) %in% c("Saturday","Sunday"),"weekend","weekday"))
 
+#aggregate step data by interval and day type
 mean_steps_by_interval_by_day_type <- aggregate(steps ~ interval+day_type, data_im, mean)
 
+#plot time series of 5-minute intervals and the average steps taken, grouped by day
 ggplot(data=mean_steps_by_interval_by_day_type,aes(x=interval,y=steps)) +
     geom_line() +
     facet_grid(day_type ~ .) + 
     labs(Title="Average Steps by Interval and Day Type",x="Interval",y="Steps")
 ```
 
-![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
